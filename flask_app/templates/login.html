@@ -1,0 +1,63 @@
+{% extends 'layout.html'%}
+
+{% block nav %}
+<li><a href="/dashboard">Dashboard</a></li>
+<li><a href="/login">Login</a></li>
+{% endblock %}
+
+{% block content %}
+<!-- Background image -->
+<style>
+    body {
+        background-image: url('/static/img/surf2.png');
+        opacity: 0.9;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+</style>
+
+<!-- Login Form -->
+<div class="d-flex justify-content-center align-items-center mt-5">
+    <div class="form-row text-light w-25">
+        <h1 class="display-5 text-center">Login</h1>
+        <hr>
+        <form action="/login" method="POST">
+            <div class="p-3">
+                <input type="text" name="email" class="form-control" placeholder="Email">
+            </div>
+
+            <div class="p-3">
+                <input type="password" name="password" class="form-control" placeholder="Password">
+            </div>
+
+            <div class="text-center hover">
+                <input type="submit" Value="Login" class="btn btn-dark mt-3">
+            </div>
+        </form>
+
+        <!-- Login Flash Messages -->
+        <style>
+            .registration {
+                color: yellow;
+                font-size: x-large;
+                font-weight: 800;
+                padding: 10px;
+                -webkit-text-stroke: 1px black;
+            }
+
+        </style>
+        <div class="mt-3 text-center">
+            {% with messages = get_flashed_messages(category_filter=['login']) %}
+            {% if messages %}
+            <ul class=registration>
+                {% for message in messages %}
+                <li>{{message}}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+</div>
+
+{% endblock%}

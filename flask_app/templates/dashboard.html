@@ -1,0 +1,199 @@
+{% extends 'layout.html' %}
+
+{% block nav %}
+<li><a href="/dashboard">Dashboard</a></li>
+
+{% if session['user_id'] %}
+<li><a href="/logout">Logout</a></li>
+<li><p class="text-light">Logged in as : {{session['user_name']}}</p></li>
+
+{% else %}
+<li><a href="/register">Register</a></li>
+<li><a href="/login">Login</a></li>
+
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background-image: url('/static/img/river_surf.jpg');
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+</style>
+
+<!-- Current Weather -->
+<div class="weather mt-5">
+    <div class="container w-25">
+
+        <div class="row d-flex justify-content-center align-items-center text-center">
+            <div>
+
+                <div class="card opacity-75 bg-light text-dark" style="color: #4B515D; border-radius: 35px;">
+                    <div class="card-body p-4">
+
+                        <div class="d-flex">
+                            <h6 class="flex-grow-1 text-dark text-center">{{city}}</h6>
+                        </div>
+
+                        <div class="d-flex flex-column text-center mt-5 mb-4">
+                            <h6 class="display-4 mb-0 font-weight-bold" style="color:black;"> {{temp_fahrenheit}}°F </h6>
+                            <span class="small" style="color: black;">Feels Like {{feels_like_fahrenheit}}°F - {{description}}</span>
+                        </div>
+
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1" style="font-size: 1rem;">
+                                <div><i class="fas fa-wind fa-fw"></i> 
+                                    <span class="ms-1" style="color: black;">
+                                        {{wind_speed_mph}} MPH
+                                    </span>
+                                </div>
+                                <div><i class="fas fa-tint fa-fw"></i> 
+                                    <span class="ms-1" style="color: black;">
+                                        Humidity: {{humidity}}%  
+                                    </span>
+                                </div>
+                                <div><i class="fas fa-sun fa-fw"></i> 
+                                    <span class="ms-1" style="color: black;">
+                                        Sunrise: {{sunrise_time.strftime("%#I:%M %p")}} 
+                                    </span>
+                                </div>
+                                <div><i class="fas fa-sun fa-fw"></i> 
+                                    <span class="ms-1" style="color: black;">
+                                    Sunset: {{sunset_time.strftime("%#I:%M %p")}} 
+                                </span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- End -->
+
+<!-- Current Conditions -->
+    <style>
+        th,
+        td {
+            background-color: #fff;
+
+        }
+
+        th {
+            font: 14px;
+            text-align: center;
+            background-color: slategray;
+            color: #ffffff;
+        }
+
+        td {
+            font: 14px;
+            text-align: center;
+            background-color: #f1f5f8;
+            color: #454545;
+        }
+
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script>
+
+        var script_url = "https://script.google.com/macros/s/AKfycbwe-4uyzJlwlQA0zP0reeYNSr2qh8ZSZEJlTdaKPQxlL9lfhQ/exec";
+
+        // Make an AJAX call to Google Script
+
+        function read_value() {
+            $("#re").css("visibility", "hidden");
+            var url = script_url + "?action=read";
+
+            $.getJSON(url, function (json) {
+
+                // Set the variables from the results array
+
+                // CREATE DYNAMIC TABLE.
+                var table = document.createElement("table");
+                var tHead = table.createTHead();
+                x = 0
+                head = tHead.insertRow(-1);
+                var HeadCell = head.insertCell(-1);
+                HeadCell.outerHTML = "<th>" + json.records[x].Display + "</th>";
+
+
+                // ADD JSON DATA TO THE TABLE AS ROWS.
+                var tBody = document.createElement("tbody");
+                table.appendChild(tBody);
+                for (var i = 1; i < json.records.length; i++) {
+                    row = tBody.insertRow(-1);
+                    var tabCell = row.insertCell(-1);
+                    tabCell.innerHTML = json.records[i].Display;
+
+                }
+
+
+                // FINALLY ADD THE NEWLY CREATED TABLE WITH JSON DATA TO A CONTAINER.
+                var divContainer = document.getElementById("showData");
+                divContainer.appendChild(table);
+                $("#re").css("visibility", "visible");
+            });
+        }
+
+    </script>
+
+<body onload="read_value()">
+    <div class="d-flex justify-content-center align-items-center mt-1 p-5 opacity-75">
+
+        <p id="re"></p>
+
+        <div id="showData"></div>
+    </div>
+</body>
+<!-- End -->
+
+<!-- Community Message Board -->
+<div class="msg_board rounded container opacity-75">
+    <h2 class="text-light display-6 text-center"> Community Updates</h2>
+    <table class="table table-responsive text-light rounded rounded-5 overflow-hidden">
+        <thead class="bg-dark">
+            <tr class="text-center">
+                <th>Title</th>
+                <th>Posted By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody class="bg-light text-dark">
+            {% for post in posts %}
+            <tr class="text-center">
+                <td>{{post.post_title}}</td>
+                <td>{{post.created_by.user_name}}</td>
+                <td>
+                    {% if post.user_id == session['user_id'] %}
+                    <a href="/view/post/{{post.id}}" class="text-decoration-none text-dark">View</a>
+                    <a href="/edit/post/{{post.id}}" class="text-decoration-none text-dark">Edit</a>
+                    <a href="/delete/post/{{post.id}}" class="text-decoration-none text-dark">Delete</a>
+                    {% else %}
+                    <a href="/view/post/{{post.id}}" class="text-decoration-none text-dark">View</a>
+                    
+                    {% endif %}
+                </td>
+            </tr> 
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if session %}
+    <div class="d-flex">
+        <a href="/post/message" class="btn btn-light text-dark">Leave a message</a>
+    </div>
+    {% else %}
+    
+    {% endif %}
+</div>
+<!-- End -->
+
+{% endblock %}
+
